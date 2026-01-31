@@ -38,4 +38,6 @@ public interface TutorLeaveRepository
             LocalDate fromDate,
             LocalDate toDate
     );
+
+
 }

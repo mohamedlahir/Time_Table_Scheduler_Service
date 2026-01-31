@@ -24,4 +24,6 @@ public class Subject {
     private int weeklyRequiredPeriods;
 
     private boolean active = true;
+
+//    private String subjectCode;
 }

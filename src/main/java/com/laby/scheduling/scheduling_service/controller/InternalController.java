@@ -1,9 +1,12 @@
 package com.laby.scheduling.scheduling_service.controller.internal;
 
+import com.laby.scheduling.scheduling_service.batch_processing.BatchImportService;
 import com.laby.scheduling.scheduling_service.entity.*;
 import com.laby.scheduling.scheduling_service.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/scheduler/internal/setup")
@@ -16,6 +19,7 @@ public class InternalController {
     private final TutorRepository tutorRepository;
     private final TutorSubjectRepository tutorSubjectRepository;
     private final TutorAvailabilityRepository tutorAvailabilityRepository;
+    private final BatchImportService batchImportService;
 
     // ================= SCHOOL =================
 
@@ -70,4 +74,14 @@ public class InternalController {
     ) {
         return tutorAvailabilityRepository.save(availability);
     }
+
+    @PostMapping("/upload/tutors")
+    public ResponseEntity<String> uploadTutors(
+            @RequestParam MultipartFile tutorsFile,
+            @RequestParam MultipartFile tutorSubjectsFile
+    ) {
+        batchImportService.importTutors(tutorsFile, tutorSubjectsFile);
+        return ResponseEntity.ok("Tutors imported successfully");
+    }
+
 }

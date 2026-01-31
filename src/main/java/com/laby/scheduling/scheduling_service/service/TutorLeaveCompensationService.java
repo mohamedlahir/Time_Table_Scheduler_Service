@@ -1,29 +1,24 @@
 package com.laby.scheduling.scheduling_service.service;
 
 import com.laby.scheduling.scheduling_service.entity.TimetableEntry;
-import com.laby.scheduling.scheduling_service.entity.Tutor;
 import com.laby.scheduling.scheduling_service.entity.WeeklyTimetable;
 import com.laby.scheduling.scheduling_service.repository.TimetableEntryRepository;
-import com.laby.scheduling.scheduling_service.repository.TutorLeaveRepository;
 import com.laby.scheduling.scheduling_service.repository.WeeklyTimetableRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class TutorLeaveCompensationService {
 
-    private final TutorLeaveRepository tutorLeaveRepository;
     private final TimetableEntryRepository timetableEntryRepository;
     private final TutorSelectionService tutorSelectionService;
     private final WeeklyTimetableRepository weeklyTimetableRepository;
 
-    /**
-     * Call this AFTER a tutor leave is approved
-     */
     public void compensateTutorLeave(
             String tutorId,
             LocalDate fromDate,
@@ -68,20 +63,22 @@ public class TutorLeaveCompensationService {
                 continue;
             }
 
-            Tutor replacement =
+            // ✅ FIX: expect Optional<String>, not Tutor
+            Optional<String> replacementTutorId =
                     tutorSelectionService.findEligibleTutor(
-                            week.getId(),                 // ✅ weeklyTimetableId
-                            entry.getSchoolId(),          // ✅ schoolId
-                            entry.getSubjectId(),         // ✅ subjectId
-                            entry.getDayOfWeek(),         // ✅ day
-                            classDate,                    // ✅ classDate
-                            entry.getPeriodNumber()       // ✅ periodNumber
+                            entry.getSchoolId(),          // schoolId
+                            entry.getClassRoomId(),       // classRoomId
+                            entry.getSubjectId(),         // subjectId
+                            entry.getDayOfWeek(),         // day
+                            week.getWeekStartDate(),      // week start
+                            entry.getPeriodNumber()       // period
                     );
 
-            if (replacement != null) {
-                entry.setTutorId(replacement.getAuthUserId());
+            if (replacementTutorId.isPresent()) {
+                entry.setTutorId(replacementTutorId.get());
                 entry.setStatus(TimetableEntry.Status.REPLACED);
             } else {
+                entry.setTutorId(null);
                 entry.setStatus(TimetableEntry.Status.CONFLICT);
             }
 

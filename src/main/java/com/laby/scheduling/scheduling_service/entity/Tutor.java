@@ -16,5 +16,7 @@ public class Tutor {
 
     private int maxClassesPerDay;
 
+    private String name;
+
     private boolean active = true;
 }
