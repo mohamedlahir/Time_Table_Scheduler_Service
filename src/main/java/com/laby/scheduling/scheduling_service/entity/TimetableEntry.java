@@ -24,7 +24,8 @@ public class TimetableEntry {
 
     private Long schoolId;
     private Long classRoomId;
-
+    private String tutorName;
+    private String subjectName;
     @Enumerated(EnumType.STRING)
     private DayOfWeek dayOfWeek;
 
