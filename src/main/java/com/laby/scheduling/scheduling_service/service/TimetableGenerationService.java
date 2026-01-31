@@ -21,7 +21,7 @@ public class TimetableGenerationService {
     private final SubjectRepository subjectRepository;
     private final SchoolRepository schoolRepository;
     private final TutorSelectionService tutorSelectionService;
-
+    private final TutorRepository tutorRepository;
     /**
      * Entry point
      */
@@ -77,7 +77,7 @@ public class TimetableGenerationService {
                 Subject subject =
                         subjects.get((int) (Math.random() * subjects.size()));
                 entry.setSubjectId(subject.getId());
-
+                entry.setSubjectName(subject.getName());
                 Optional<String> tutorOpt =
                         tutorSelectionService.findEligibleTutor(
                                 school.getId(),
@@ -89,7 +89,13 @@ public class TimetableGenerationService {
                         );
 
                 if (tutorOpt.isPresent()) {
+                    String tutorName = tutorRepository
+                            .findById(tutorOpt.get())
+                            .map(Tutor::getName)
+                            .orElse("Unknown Tutor");
+                    entry.setTutorName(tutorName);
                     entry.setTutorId(tutorOpt.get());
+//                    entry.settutorName(tutorOpt.get());
                     entry.setStatus(TimetableEntry.Status.ASSIGNED);
                 } else {
                     entry.setStatus(TimetableEntry.Status.CONFLICT);
