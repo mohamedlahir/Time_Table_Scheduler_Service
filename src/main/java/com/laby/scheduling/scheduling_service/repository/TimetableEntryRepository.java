@@ -32,9 +32,23 @@ public interface TimetableEntryRepository
             int periodNumber
     );
 
+    boolean existsByTutorIdAndWeeklyTimetableIdAndDayOfWeekAndPeriodNumber(
+            String tutorId,
+            Long weeklyTimetableId,
+            DayOfWeek dayOfWeek,
+            int periodNumber
+    );
+
     long countByTutorIdAndSchoolIdAndDayOfWeek(
             String tutorId,
             Long schoolId,
+            DayOfWeek dayOfWeek
+    );
+
+    long countByTutorIdAndSchoolIdAndWeeklyTimetableIdAndDayOfWeek(
+            String tutorId,
+            Long schoolId,
+            Long weeklyTimetableId,
             DayOfWeek dayOfWeek
     );
 
