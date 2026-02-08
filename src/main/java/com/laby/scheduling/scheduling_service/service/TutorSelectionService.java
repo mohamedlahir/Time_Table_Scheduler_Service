@@ -28,6 +28,7 @@ public class TutorSelectionService {
             Long subjectId,
             DayOfWeek dayOfWeek,
             LocalDate weekStartDate,
+            Long weeklyTimetableId,
             int periodNumber
     ) {
 
@@ -51,8 +52,9 @@ public class TutorSelectionService {
 
             boolean slotBusy =
                     timetableEntryRepository
-                            .existsByTutorIdAndDayOfWeekAndPeriodNumber(
+                            .existsByTutorIdAndWeeklyTimetableIdAndDayOfWeekAndPeriodNumber(
                                     tutorId,
+                                    weeklyTimetableId,
                                     dayOfWeek,
                                     periodNumber
                             );
@@ -61,9 +63,10 @@ public class TutorSelectionService {
 
             long dailyCount =
                     timetableEntryRepository
-                            .countByTutorIdAndSchoolIdAndDayOfWeek(
+                            .countByTutorIdAndSchoolIdAndWeeklyTimetableIdAndDayOfWeek(
                                     tutorId,
                                     schoolId,
+                                    weeklyTimetableId,
                                     dayOfWeek
                             );
 
