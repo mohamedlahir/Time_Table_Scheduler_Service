@@ -22,5 +22,8 @@ public class ClassRoom {
 
     private Long schoolId;
 
+    @Enumerated(EnumType.STRING)
+    private Level level;
+
     private boolean active = true;
 }
