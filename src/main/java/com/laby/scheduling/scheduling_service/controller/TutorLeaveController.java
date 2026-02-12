@@ -18,7 +18,7 @@ public class TutorLeaveController {
     private final TutorLeaveRepository tutorLeaveRepository;
     private final TutorLeaveCompensationService compensationService;
 
-    @PostMapping
+    @PostMapping("/leave_request")
     public ResponseEntity<String> applyLeave(
             @RequestBody TutorLeave leave
     ) {

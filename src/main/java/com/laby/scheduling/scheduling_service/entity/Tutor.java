@@ -18,5 +18,8 @@ public class Tutor {
 
     private String name;
 
+    @Enumerated(EnumType.STRING)
+    private Level level;
+
     private boolean active = true;
 }

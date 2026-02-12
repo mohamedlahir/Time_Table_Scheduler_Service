@@ -1,8 +1,10 @@
 package com.laby.scheduling.scheduling_service.service;
 
 import com.laby.scheduling.scheduling_service.entity.TimetableEntry;
+import com.laby.scheduling.scheduling_service.entity.Tutor;
 import com.laby.scheduling.scheduling_service.entity.WeeklyTimetable;
 import com.laby.scheduling.scheduling_service.repository.TimetableEntryRepository;
+import com.laby.scheduling.scheduling_service.repository.TutorRepository;
 import com.laby.scheduling.scheduling_service.repository.WeeklyTimetableRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ public class TutorLeaveCompensationService {
     private final TimetableEntryRepository timetableEntryRepository;
     private final TutorSelectionService tutorSelectionService;
     private final WeeklyTimetableRepository weeklyTimetableRepository;
+    private final TutorRepository tutorRepository;
 
     public void compensateTutorLeave(
             String tutorId,
@@ -71,14 +74,22 @@ public class TutorLeaveCompensationService {
                             entry.getSubjectId(),         // subjectId
                             entry.getDayOfWeek(),         // day
                             week.getWeekStartDate(),      // week start
+                            week.getId(),                 // week id
                             entry.getPeriodNumber()       // period
                     );
 
             if (replacementTutorId.isPresent()) {
-                entry.setTutorId(replacementTutorId.get());
+                String newTutorId = replacementTutorId.get();
+                entry.setTutorId(newTutorId);
+                String tutorName = tutorRepository
+                        .findById(newTutorId)
+                        .map(Tutor::getName)
+                        .orElse(null);
+                entry.setTutorName(tutorName);
                 entry.setStatus(TimetableEntry.Status.REPLACED);
             } else {
                 entry.setTutorId(null);
+                entry.setTutorName(null);
                 entry.setStatus(TimetableEntry.Status.CONFLICT);
             }
 

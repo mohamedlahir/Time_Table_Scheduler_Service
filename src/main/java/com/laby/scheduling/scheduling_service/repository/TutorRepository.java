@@ -4,6 +4,7 @@ import com.laby.scheduling.scheduling_service.entity.Tutor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface TutorRepository extends JpaRepository<Tutor, String> {
@@ -17,5 +18,7 @@ public interface TutorRepository extends JpaRepository<Tutor, String> {
 
     @Query("select t.maxClassesPerDay from Tutor t where t.authUserId = :tutorId")
     int findMaxClassesPerDay(String tutorId);
+
+    List<Tutor> findByAuthUserIdIn(Collection<String> tutorIds);
 
 }
