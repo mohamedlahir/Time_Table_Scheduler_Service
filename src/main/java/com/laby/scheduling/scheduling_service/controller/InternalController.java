@@ -75,6 +75,7 @@ public class InternalController {
         return tutorAvailabilityRepository.save(availability);
     }
 
+
     @PostMapping("/upload/tutors")
     public ResponseEntity<String> uploadTutors(
             @RequestParam MultipartFile tutorsFile,
@@ -82,6 +83,14 @@ public class InternalController {
     ) {
         batchImportService.importTutors(tutorsFile, tutorSubjectsFile);
         return ResponseEntity.ok("Tutors imported successfully");
+    }
+
+    @PostMapping("/upload/subjects")
+    public ResponseEntity<String> uploadSubjects(
+            @RequestParam MultipartFile subjectsFile
+    ) {
+        batchImportService.importSubjects(subjectsFile);
+        return ResponseEntity.ok("Subjects imported successfully");
     }
 
 }

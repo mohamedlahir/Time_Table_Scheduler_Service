@@ -7,7 +7,7 @@ import lombok.*;
 @Table(
         name = "subjects",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"schoolId", "name"})
+                @UniqueConstraint(columnNames = {"schoolId", "name", "grade"})
         }
 )
 @Getter @Setter @NoArgsConstructor
@@ -20,6 +20,8 @@ public class Subject {
     private String name;
 
     private Long schoolId;
+
+    private String grade;
 
     private int weeklyRequiredPeriods;
 

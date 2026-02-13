@@ -3,6 +3,7 @@ package com.laby.scheduling.scheduling_service.batch_processing;
 import com.laby.scheduling.scheduling_service.entity.Subject;
 import com.laby.scheduling.scheduling_service.entity.Tutor;
 import com.laby.scheduling.scheduling_service.DTO.TutorExcelDTO;
+import com.laby.scheduling.scheduling_service.DTO.SubjectExcelDTO;
 import com.laby.scheduling.scheduling_service.DTO.TutorSubjectExcelDTO;
 import com.laby.scheduling.scheduling_service.entity.TutorSubject;
 import com.laby.scheduling.scheduling_service.repository.SubjectRepository;
@@ -63,6 +64,45 @@ public class BatchImportService {
     }
 
     // =========================================================
+    // SUBJECTS IMPORT (with Grade)
+    // =========================================================
+    @Transactional
+    public void importSubjects(MultipartFile subjectsFile) {
+
+        List<SubjectExcelDTO> subjectDTOs =
+                ExcelUtil.parseSubjects(subjectsFile);
+
+        if (subjectDTOs.isEmpty()) {
+            throw new RuntimeException("Subjects file is empty");
+        }
+
+        for (SubjectExcelDTO dto : subjectDTOs) {
+            String name = dto.getName();
+            Long schoolId = dto.getSchoolId();
+            String grade = dto.getGrade();
+
+            if (name == null || name.isBlank()) {
+                continue;
+            }
+            if (schoolId == null) {
+                throw new RuntimeException("SchoolId is required for subject: " + name);
+            }
+
+            Subject subject = subjectRepository
+                    .findBySchoolIdAndNameAndGrade(schoolId, name, grade)
+                    .orElseGet(Subject::new);
+
+            subject.setName(name);
+            subject.setSchoolId(schoolId);
+            subject.setGrade(grade);
+            subject.setWeeklyRequiredPeriods(dto.getWeeklyRequiredPeriods());
+            subject.setActive(dto.isActive());
+
+            subjectRepository.save(subject);
+        }
+    }
+
+    // =========================================================
     // VALIDATION
     // =========================================================
     private void validateTutorSubjects(List<TutorExcelDTO> tutors,
@@ -79,10 +119,17 @@ public class BatchImportService {
         for (TutorSubjectExcelDTO dto : subjects) {
 
             String tutorId = dto.getTutorId();
+            String grade = dto.getGrade();
 
             if (tutorId == null || tutorId.trim().isEmpty()) {
                 throw new RuntimeException(
                         "TutorSubject row has EMPTY tutorId for subject: "
+                                + dto.getSubjectCode()
+                );
+            }
+            if (grade == null || grade.trim().isEmpty()) {
+                throw new RuntimeException(
+                        "TutorSubject row has EMPTY grade for subject: "
                                 + dto.getSubjectCode()
                 );
             }
@@ -141,6 +188,7 @@ public class BatchImportService {
         tutorSubjectRepository.deleteAll();
 
         List<TutorSubject> tutorSubjects = new ArrayList<>();
+        Set<String> seenPairs = new HashSet<>();
 
         for (TutorSubjectExcelDTO dto : subjectDTOs) {
             String tutorId = dto.getTutorId().trim();
@@ -151,10 +199,22 @@ public class BatchImportService {
 
             // ✅ SUBJECT LOOKUP
             Subject subject = subjectRepository
-                    .findByName(dto.getSubjectCode()) // subjectCode = subject name
+                    .findBySchoolIdAndNameAndGrade(
+                            tutor.getSchoolId(),
+                            dto.getSubjectCode(),
+                            dto.getGrade()
+                    )
                     .orElseThrow(() ->
-                            new RuntimeException("Subject not found: " + dto.getSubjectCode())
+                            new RuntimeException(
+                                    "Subject not found: " + dto.getSubjectCode()
+                                            + " (grade " + dto.getGrade() + ")"
+                            )
                     );
+
+            String pairKey = tutorId + "|" + subject.getId();
+            if (!seenPairs.add(pairKey)) {
+                continue; // skip duplicate pair in the same import
+            }
 
             TutorSubject tutorSubject = new TutorSubject();
             tutorSubject.setTutorId(tutor.getAuthUserId());

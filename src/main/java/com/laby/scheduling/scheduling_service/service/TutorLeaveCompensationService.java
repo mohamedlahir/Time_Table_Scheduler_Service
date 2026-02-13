@@ -71,6 +71,7 @@ public class TutorLeaveCompensationService {
                             entry.getSubjectId(),         // subjectId
                             entry.getDayOfWeek(),         // day
                             week.getWeekStartDate(),      // week start
+                            week.getId(),                 // week id
                             entry.getPeriodNumber()       // period
                     );
 
